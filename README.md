@@ -30,5 +30,7 @@ node cliente/tareas.js eliminar 1
 
 ```bash
 cd servidor && python -m unittest -v
-cd cliente && npm test
+cd cliente && npm test        # levanta el servidor real: necesita python
 ```
+
+GitHub Actions ejecuta ambas suites en cada push (`.github/workflows/pruebas.yml`).
