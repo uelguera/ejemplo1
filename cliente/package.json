@@ -1,0 +1,11 @@
+{
+  "name": "tareas-cliente",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cliente de línea de comandos para la API de tareas",
+  "scripts": {
+    "tareas": "node tareas.js",
+    "test": "node --test"
+  }
+}
