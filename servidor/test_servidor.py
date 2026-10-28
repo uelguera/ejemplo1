@@ -37,6 +37,12 @@ class PruebasApi(unittest.TestCase):
             with e:  # cierra la respuesta de error para evitar ResourceWarning
                 return e.code, json.loads(e.read())
 
+    def test_pagina_web(self):
+        with urllib.request.urlopen(self.base + "/") as respuesta:
+            self.assertEqual(respuesta.status, 200)
+            self.assertIn("text/html", respuesta.headers["Content-Type"])
+            self.assertIn("<title>Lista de tareas</title>", respuesta.read().decode("utf-8"))
+
     def test_lista_vacia_al_inicio(self):
         self.assertEqual(self.pedir("GET", "/tareas"), (200, []))
 

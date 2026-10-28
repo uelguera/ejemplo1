@@ -5,6 +5,7 @@ Proyecto de aprendizaje para practicar Claude Code. Es pequeño a propósito.
 ## Arquitectura
 
 - `servidor/servidor.py` — API HTTP en Python (solo librería estándar). Guarda en `servidor/tareas.json`.
+- `servidor/web/index.html` — página web (HTML, CSS y JS en un archivo) que `servidor.py` sirve en `/` y usa la misma API.
 - `cliente/tareas.js` — CLI en Node.js que llama a la API con `fetch`.
 
 ## Comandos

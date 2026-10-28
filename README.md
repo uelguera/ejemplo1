@@ -14,7 +14,7 @@ En una terminal:
 python servidor/servidor.py
 ```
 
-En otra:
+Abre **http://127.0.0.1:8000** en el navegador para usar la página web, o en otra terminal usa el CLI:
 
 ```bash
 node cliente/tareas.js agregar "Aprender Claude Code"

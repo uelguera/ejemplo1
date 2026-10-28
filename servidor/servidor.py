@@ -1,6 +1,7 @@
 """API de tareas: servidor HTTP mínimo con la librería estándar de Python.
 
 Endpoints:
+    GET    /                -> página web para usar la lista desde el navegador
     GET    /tareas          -> lista todas las tareas
                                (?estado=pendientes o ?estado=completadas para filtrar)
     POST   /tareas          -> crea una tarea  (cuerpo: {"titulo": "..."})
@@ -22,6 +23,7 @@ from urllib.parse import parse_qs, urlsplit
 
 PUERTO = int(os.environ.get("TAREAS_PUERTO", 8000))
 ARCHIVO_DATOS = Path(os.environ.get("TAREAS_ARCHIVO", Path(__file__).parent / "tareas.json"))
+PAGINA_WEB = Path(__file__).parent / "web" / "index.html"
 FILTROS = {"pendientes": False, "completadas": True}
 
 
@@ -69,13 +71,16 @@ def crear_manejador(almacen: Almacen):
     """Devuelve una clase de manejador HTTP que usa el almacén dado."""
 
     class Manejador(BaseHTTPRequestHandler):
-        def _responder(self, estado: int, cuerpo=None) -> None:
-            datos = json.dumps(cuerpo, ensure_ascii=False).encode("utf-8") if cuerpo is not None else b""
+        def _enviar(self, estado: int, datos: bytes, tipo: str) -> None:
             self.send_response(estado)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Type", tipo)
             self.send_header("Content-Length", str(len(datos)))
             self.end_headers()
             self.wfile.write(datos)
+
+        def _responder(self, estado: int, cuerpo=None) -> None:
+            datos = json.dumps(cuerpo, ensure_ascii=False).encode("utf-8") if cuerpo is not None else b""
+            self._enviar(estado, datos, "application/json; charset=utf-8")
 
         def _id_de_ruta(self) -> int | None:
             partes = self.path.strip("/").split("/")
@@ -94,6 +99,8 @@ def crear_manejador(almacen: Almacen):
 
         def do_GET(self):
             url = urlsplit(self.path)
+            if url.path == "/":
+                return self._enviar(200, PAGINA_WEB.read_bytes(), "text/html; charset=utf-8")
             if url.path != "/tareas":
                 return self._responder(404, {"error": "Ruta no encontrada"})
             tareas = almacen.leer()
