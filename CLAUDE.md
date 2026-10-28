@@ -13,7 +13,7 @@ Proyecto de aprendizaje para practicar Claude Code. Es pequeño a propósito.
 | Tarea | Comando |
 |---|---|
 | Levantar servidor | `python servidor/servidor.py` (puerto 8000) |
-| Usar el cliente | `node cliente/tareas.js listar [pendientes\|completadas]` · `agregar "..."` · `completar <id>` · `desmarcar <id>` · `editar <id> "..."` · `eliminar <id>` |
+| Usar el cliente | `node cliente/tareas.js listar [pendientes\|completadas]` · `agregar "..."` · `completar <id>` · `desmarcar <id>` · `editar <id> "..."` · `eliminar <id>` · `respaldar [carpeta]` |
 | Pruebas Python | `cd servidor && python -m unittest -v` |
 | Pruebas Node | `cd cliente && npm test` (levantan el servidor real: necesitan `python`) |
 

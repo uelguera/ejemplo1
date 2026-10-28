@@ -26,6 +26,17 @@ node cliente/tareas.js editar 1 "Aprender Claude Code a fondo"
 node cliente/tareas.js eliminar 1
 ```
 
+## Copia de seguridad
+
+Las tareas se guardan en `servidor/tareas.json` (no se sube a git). Para copiarlas, con el servidor encendido:
+
+```bash
+node cliente/tareas.js respaldar              # en respaldos/tareas-AAAA-MM-DD_HH-MM-SS.json
+node cliente/tareas.js respaldar E:\copias    # o en otra carpeta (USB, Google Drive...)
+```
+
+Para restaurar una copia, cópiala encima de `servidor/tareas.json`.
+
 ## Pruebas
 
 ```bash

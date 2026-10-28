@@ -9,12 +9,27 @@
 //   node tareas.js desmarcar 1
 //   node tareas.js editar 1 "Comprar pan integral"
 //   node tareas.js eliminar 1
+//   node tareas.js respaldar              (copia en respaldos/ del proyecto)
+//   node tareas.js respaldar E:\copias    (o en la carpeta indicada)
+
+import { mkdir, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const URL_BASE = process.env.TAREAS_URL ?? "http://127.0.0.1:8000";
+const CARPETA_RESPALDOS = fileURLToPath(new URL("../respaldos/", import.meta.url));
 
 export function formatearTarea(tarea) {
   const marca = tarea.completada ? "[x]" : "[ ]";
   return `${marca} ${tarea.id}. ${tarea.titulo}`;
+}
+
+// Nombre con fecha y hora local, p. ej. tareas-2026-10-28_16-30-05.json
+export function nombreRespaldo(fecha = new Date()) {
+  const dos = (numero) => String(numero).padStart(2, "0");
+  const dia = `${fecha.getFullYear()}-${dos(fecha.getMonth() + 1)}-${dos(fecha.getDate())}`;
+  const hora = `${dos(fecha.getHours())}-${dos(fecha.getMinutes())}-${dos(fecha.getSeconds())}`;
+  return `tareas-${dia}_${hora}.json`;
 }
 
 async function pedir(metodo, ruta, cuerpo) {
@@ -57,13 +72,21 @@ const comandos = {
     await pedir("DELETE", `/tareas/${id}`);
     console.log(`Eliminada la tarea ${id}.`);
   },
+  async respaldar(carpeta = CARPETA_RESPALDOS) {
+    const tareas = await pedir("GET", "/tareas");
+    await mkdir(carpeta, { recursive: true });
+    const ruta = resolve(carpeta, nombreRespaldo());
+    await writeFile(ruta, JSON.stringify(tareas, null, 2) + "\n", "utf-8");
+    const cantidad = `${tareas.length} ${tareas.length === 1 ? "tarea" : "tareas"}`;
+    console.log(`Copia de seguridad guardada (${cantidad}): ${ruta}`);
+  },
 };
 
 async function main() {
   const [comando, ...args] = process.argv.slice(2);
   const accion = comandos[comando];
   if (!accion) {
-    console.log("Uso: node tareas.js <listar [pendientes|completadas] | agregar \"titulo\" | completar <id> | desmarcar <id> | editar <id> \"titulo\" | eliminar <id>>");
+    console.log("Uso: node tareas.js <listar [pendientes|completadas] | agregar \"titulo\" | completar <id> | desmarcar <id> | editar <id> \"titulo\" | eliminar <id> | respaldar [carpeta]>");
     process.exitCode = 1;
     return;
   }

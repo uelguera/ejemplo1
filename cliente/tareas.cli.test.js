@@ -4,7 +4,7 @@
 import { test, before, beforeEach, after } from "node:test";
 import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -95,6 +95,22 @@ test("eliminar quita la tarea", async () => {
   await cli("agregar", "Una");
   assert.equal((await cli("eliminar", "1")).salida, "Eliminada la tarea 1.");
   assert.equal((await cli("listar")).salida, "No hay tareas.");
+});
+
+test("respaldar guarda las tareas en un archivo nuevo de la carpeta indicada", async () => {
+  await cli("agregar", "Una");
+  await cli("agregar", "Dos");
+  await cli("completar", "2");
+  const destino = join(carpeta, "respaldos");
+  const { codigo, salida } = await cli("respaldar", destino);
+  assert.equal(codigo, 0);
+  assert.match(salida, /^Copia de seguridad guardada \(2 tareas\): .*tareas-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$/);
+  const archivos = readdirSync(destino);
+  assert.equal(archivos.length, 1);
+  assert.deepEqual(JSON.parse(readFileSync(join(destino, archivos[0]), "utf-8")), [
+    { id: 1, titulo: "Una", completada: false },
+    { id: 2, titulo: "Dos", completada: true },
+  ]);
 });
 
 test("los errores del servidor se muestran y salen con código 1", async () => {
