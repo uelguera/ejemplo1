@@ -8,15 +8,20 @@ Endpoints:
                                con cuerpo {"titulo": "...", "completada": true|false}
                                (ambos opcionales) cambia esos campos
     DELETE /tareas/<id>     -> elimina una tarea
+
+Variables de entorno opcionales:
+    TAREAS_PUERTO   -> puerto (por defecto 8000; 0 = uno libre cualquiera)
+    TAREAS_ARCHIVO  -> archivo JSON de datos (por defecto servidor/tareas.json)
 """
 
 import json
+import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
-PUERTO = 8000
-ARCHIVO_DATOS = Path(__file__).parent / "tareas.json"
+PUERTO = int(os.environ.get("TAREAS_PUERTO", 8000))
+ARCHIVO_DATOS = Path(os.environ.get("TAREAS_ARCHIVO", Path(__file__).parent / "tareas.json"))
 FILTROS = {"pendientes": False, "completadas": True}
 
 
@@ -148,7 +153,8 @@ def crear_manejador(almacen: Almacen):
 
 def main() -> None:
     servidor = ThreadingHTTPServer(("127.0.0.1", PUERTO), crear_manejador(Almacen(ARCHIVO_DATOS)))
-    print(f"Servidor de tareas escuchando en http://127.0.0.1:{PUERTO}  (Ctrl+C para detener)")
+    puerto = servidor.server_address[1]  # el real, por si PUERTO era 0
+    print(f"Servidor de tareas escuchando en http://127.0.0.1:{puerto}  (Ctrl+C para detener)", flush=True)
     try:
         servidor.serve_forever()
     except KeyboardInterrupt:
